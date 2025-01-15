@@ -7,8 +7,8 @@ substitutions:
   friendly_name: ESP32-S3-Box-3
   
   external_media_player: your_media_player  ##change this to your external media player enity_id: do not include media_player.
-  home_assistant_host: http://homeassistant.local:8123 ##change to the full url or IP of your HA server including port
-  tts_voice_speed: "24000" #options #nabu casa "24000" #piper "16000" elevenlabs "44100" must include quotes
+  home_assistant_host: http://10.11.50.68:8123 ##change to the full url or IP of your HA server including port
+  tts_voice_speed: "16000" #options #nabu casa "24000" #piper "16000" elevenlabs "44100" must include quotes
   
 #################### ON DEVICE WAKE WORDS #######################################
 ####          all of the below wakewords are installed on the device        #####
@@ -17,8 +17,6 @@ substitutions:
 # TO REMOVE A WAKE WORD - COMMENT OUT THE CORESPONDING LINE FROM THE CONFIG BELOW - CTRL + F to search for "models" 
   micro_wake_word_model_1: alexa
   micro_wake_word_model_2: hey_jarvis
-  micro_wake_word_model_3: okay_nabu 
-  micro_wake_word_model_4: hey_mycroft
 ####################################################################
 
 #####  Days and months #####
@@ -737,6 +735,11 @@ text_sensor:
           id(text_request).state = (truncated+"...").c_str();
         }
 
+  - platform: template
+    name: "Last Wake Word"
+    id: last_wake_word
+    icon: "mdi:account-voice" 
+
   - id: text_response
     platform: template
     on_value:
@@ -879,9 +882,9 @@ micro_wake_word:
   models: 
     - model: ${micro_wake_word_model_1}
     - model: ${micro_wake_word_model_2}
-    - model: ${micro_wake_word_model_3}
-    - model: ${micro_wake_word_model_4}
   on_wake_word_detected:
+    - lambda: |-
+        id(last_wake_word).publish_state(wake_word);
     - if:
         condition:
           and:
